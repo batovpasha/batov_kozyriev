@@ -14,24 +14,22 @@ struct List {
 
 class Queue {
   public:
-      bool empty(List *head) {
-        return head == nullptr ? true : false;
-      }
-      void print(List *head) {
-        List *mid = head;
+      bool empty(List *tail) { return tail == nullptr ? true : false; }
+      void print(List *tail) {
+        List *mid = tail;
         while (mid) {
             cout << mid->data.G << " " << mid->data.H << endl;
             mid = mid->next;
         }
       }
-      void push(List **head, int g, int h) {
+      void push(List **tail, int g, int h) {
         List *el = new List;
         el->data.G = g;
         el->data.H = h;
         el->prev = nullptr;
-        el->next = *head;
-        (*head)->prev = el;
-        *head = el;
+        el->next = *tail;
+        (*tail)->prev = el;
+        *tail = el;
       }
       void pop(List **tail) {
         List *temp = *tail;
@@ -43,11 +41,11 @@ class Queue {
 
 
 int main() {
-  List *head = nullptr;
+  List *tail = nullptr;
   List *first_point = new List;
-  head = first_point;
+  tail = first_point;
   Queue queue;
-  queue.push(&head, 23, 43);
+  queue.push(&tail, 23, 43);
   ifstream fin("input.txt");
   string line;
   vector <string> data;
@@ -56,7 +54,7 @@ int main() {
     data.push_back(line);
 
   int x1 = 6, y1 = 1, x2 = 1, y2 = 6; // (x1, y1) - start point (x2, y2) - end point
-  cout << queue.empty(head) << endl;
+  cout << queue.empty(tail) << endl;
   fin.close();
   return 0;
 }
