@@ -3,7 +3,11 @@
 #include <fstream>
 using namespace std;
 
-int X1 = 1, X2 = 6, Y1 = 6, Y2 = 1; //start coordinate
+vector <string> data;
+vector <int> path;
+vector<vector<int>> steps;
+int X1 = 6, X2 = 1, Y1 = 1, Y2 = 6; //start coordinate
+int points = 0;
 
 int gValue (int x, int y) {
   return abs(X1 - x) + abs(Y1 - y);
@@ -13,95 +17,202 @@ struct List {
   List *prev;
   List *next;
   struct {
+    int p;
     int x;
     int y;
     int G;
     int H;
+    int F;
   } data;
 };
 
+List *U_tail = nullptr;
+List *Q_tail = nullptr;
+List *Q_head = nullptr;
+List *U_head = nullptr;
+
 class Queue {
   public:
-      bool empty(List *tail) { return tail == nullptr ? true : false; }
-      void print(List *tail) {
-        List *mid = tail;
-        while (mid->next) {
-            cout << mid->data.x << " " << mid->data.y << endl;
-            cout << mid->data.G << " " << mid->data.H << endl;
-            mid = mid->next;
-        }
+    bool empty(List *tail) { return tail == nullptr ? true : false; }
+    void q_push(List **head, List **tail, int x, int y, int p){
+      List *temp = new List;
+      temp->data.x = x;
+      temp->data.y = y;
+      points++;
+      path.push_back(p);
+      temp->data.p = points;
+      int g = abs(X1 - x) + abs(Y1 - y);
+      int h = abs(X2 - x) + abs(Y2 - y);
+      temp->data.G = g;
+      temp->data.H = h;
+      int f = g + h;
+      temp->data.F = f;
+      temp->next = nullptr;
+      if (!(*head)) {
+        temp->prev = nullptr;
+        temp->next = nullptr;
+        (*head) = temp;
+        (*tail) = temp;
+      } else {
+        temp->prev = (*tail);
+        temp->next = nullptr;
+        (*tail)->next = temp;
+        (*tail) = temp;
       }
-      void push(List **tail, int x, int y) {
-        List *el = new List;
-        int g = abs(X1 - x) + abs(Y1 - y);
-        int h = abs(X2 - x) + abs(Y2 - y);
-        el->data.G = g;
-        el->data.H = h;
-        el->data.x = x;
-        el->data.y = y;
-        el->prev = nullptr;
-        el->next = *tail;
-        (*tail)->prev = el;
-        *tail = el;
-      }
-      void pop(List **tail) {
-        List *temp = *tail;
-        (*tail)->prev->next = nullptr;
-        *tail = (*tail)->prev;
-        delete temp;
-      }
-      bool include(List **tail, int x, int y){
-        List *mid = *tail;
-        while(mid){
-          if ((mid->data.x == x)&&(mid->data.y == y)) return true;
-          mid = mid->next;
-        }
-        return false;
-      }
-};
-
-void A_star(List **start, List **goal){
-  List *U_tail = new List;
-  List *Q_tail = new List;
-
-  Queue U; //visited queue
-  Queue Q; //unvisited queue
-  Q.push(&Q_tail, X1, Y1);
-  Q.print(Q_tail);
-
-  while(!Q.empty(Q_tail)){
-    List *current = Q_tail;
-    int c_x = current->data.x;
-    int c_y = current->data.y;
-    if ((current->data.x == X2) && (current->data.y == Y2))
-      cout << "Vse zaebis" << endl;
-
-    Q.pop(&current);
-    U.push(&U_tail, current->data.x, current->data.y);
-    if (U.include(&U_tail, c_x-1, c_y) && gValue(c_x-1,c_y) >= current->data.G);
-    if (!U.include(&U_tail, c_x-1, c_y) || gValue(c_x-1,c_y) < current->data.G){
-      if (!Q.include(&Q_tail, c_x-1,c_y)) Q.push(&Q_tail, c_x-1,c_y);
     }
 
+    void u_push(List **head, List **tail, int x, int y){
+      List *temp = new List;
+      temp->data.x = x;
+      temp->data.y = y;
+      int g = abs(X1 - x) + abs(Y1 - y);
+      int h = abs(X2 - x) + abs(Y2 - y);
+      temp->data.G = g;
+      temp->data.H = h;
+      int f = g + h;
+      temp->data.F = f;
+      temp->next = nullptr;
+      if (!(*head)) {
+        temp->prev = nullptr;
+        temp->next = nullptr;
+        (*head) = temp;
+        (*tail) = temp;
+      } else {
+        temp->prev = (*tail);
+        temp->next = nullptr;
+        (*tail)->next = temp;
+        (*tail) = temp;
+      }
+    }
+
+    void print(List *head){
+      List *temp = head;
+      while (temp) {
+        cout << temp->data.x << " " << temp->data.y << " " << temp->data.p << endl;
+        cout << "--------" << endl;
+        temp = temp->next;
+      }
+    }
+
+  void pop(List **head, List **tail){
+    if ((*head) == (*tail)) {(*head) = (*tail) = nullptr;}
+    else if ((*head)) {
+        List *temp = (*head);
+        (*head)->next->prev = nullptr;
+        (*head) = (*head)->next;
+        delete temp;
+    }
+  };
+
+  void getMin(List **head){
+    List *temp = *head;
+    List *min_f = *head;
+    while (temp) {
+      if (temp->data.F < min_f->data.F) {
+        min_f = temp;
+      }
+      temp = temp->next;
+    }
+    swap(min_f->data.x, (*head)->data.x);
+    swap(min_f->data.y, (*head)->data.y);
+    swap(min_f->data.G, (*head)->data.G);
+    swap(min_f->data.H, (*head)->data.H);
+    swap(min_f->data.F, (*head)->data.F);
+
   }
+
+  bool include(List **head, List **tail, int x, int y) {
+    List *temp = (*head);
+    while (temp) {
+      if ((temp->data.x == x)&&(temp->data.y == y)) return true;
+      temp = temp->next;
+    }
+    return false;
+  }
+
+  int step_counter(int i, int step) {
+    if (i > 1) {
+      step++;
+      step_counter(steps[i][2] - 1, step);
+    } else return step;
+  }
+
+  void print_way(int i, int step) {
+    if (step >= 0) {
+      char temp = 97 + step;
+      data[steps[i - 1][0]][steps[i - 1][1]] = temp;
+      step--;
+      print_way(steps[i][2] - 1, step);
+    } else {
+      for (int i = 0; i < data.size(); i++) {
+        for (int j = 0; j < data[i].length(); j++) {
+          cout << data[i][j];
+        }
+        cout << endl;
+      }
+    }
+  }
+};
+
+void A_star(){
+  Queue U; //visited queue
+  Queue Q; //unvisited queue
+  Q.q_push(&Q_head, &Q_tail, X1, X2, 1);
+  Q.getMin(&Q_head);
+  List *current;
+
+  while(!Q.empty(Q_tail)){
+    Q.getMin(&Q_head);
+    current = Q_head;
+    int c_x = current->data.x;
+    int c_y = current->data.y;
+    int c_p = current->data.p;
+    vector<int> step = {c_x, c_y, path[c_p - 1]};
+    steps.push_back(step);
+    if ((c_x == X2) && (c_y == Y2)) {
+      int step = Q.step_counter(steps[steps.size() - 1][2], 0);
+      data[steps[steps.size()-1][0]][steps[steps.size()-1][1]] = (char)(98 + step);
+      Q.print_way(steps[steps.size() - 1][2], step);
+      return;
+    }
+    Q.pop(&Q_head, &Q_tail);
+    U.u_push(&U_head, &U_tail, c_x, c_y);
+
+    if (((U.include(&U_head, &U_tail, c_x-1, c_y) == false)
+    || (gValue(c_x-1,c_y) < current->data.G))
+    && (U.include(&U_head, &U_tail, c_x-1,c_y) == false)) {
+      if (data[c_x-1][c_y] != 'X') Q.q_push(&Q_head, &Q_tail, c_x-1, c_y, c_p);
+    }
+    if (((U.include(&U_head, &U_tail, c_x+1, c_y) == false)
+    || (gValue(c_x+1,c_y) < current->data.G))
+    && (U.include(&U_head, &U_tail, c_x+1,c_y) == false)) {
+      if (data[c_x+1][c_y] != 'X') Q.q_push(&Q_head, &Q_tail, c_x+1, c_y, c_p);
+    }
+    if (((U.include(&U_head, &U_tail, c_x, c_y+1) == false)
+    || (gValue(c_x,c_y+1) < current->data.G))
+    && (U.include(&U_head, &U_tail, c_x,c_y+1) == false)) {
+      if (data[c_x][c_y+1] != 'X') Q.q_push(&Q_head, &Q_tail, c_x, c_y+1, c_p);
+    }
+    if (((U.include(&U_head, &U_tail, c_x, c_y-1) == false)
+    || (gValue(c_x,c_y-1) < current->data.G))
+    && (U.include(&U_head, &U_tail, c_x,c_y-1) == false)) {
+      if (data[c_x][c_y-1] != 'X') Q.q_push(&Q_head, &Q_tail, c_x, c_y-1, c_p);
+    }
+ }
+
 }
 
 
 int main() {
-  List *tail = nullptr;
-  List *start = new List;
-  List *goal = new List;
 
   ifstream fin("input.txt");
   string line;
-  vector <string> data;
 
-  A_star(&start, &goal);
-
-  while(getline(fin, line))
+  while(getline(fin, line)){
     data.push_back(line);
+  }
 
-  // int x1 = 1, y1 = 6, x2 = 6, y2 = 1; // (x1, y1) - start point (x2, y2) - end point
+  A_star();
   fin.close();
   return 0;
 }
