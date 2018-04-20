@@ -4,7 +4,9 @@
 using namespace std;
 
 vector <string> data;
+vector <int> path;
 int X1 = 6, X2 = 1, Y1 = 1, Y2 = 6; //start coordinate
+int points = 0;
 
 int gValue (int x, int y) {
   return abs(X1 - x) + abs(Y1 - y);
@@ -14,6 +16,7 @@ struct List {
   List *prev;
   List *next;
   struct {
+    int p;
     int x;
     int y;
     int G;
@@ -30,7 +33,34 @@ List *U_head = nullptr;
 class Queue {
   public:
     bool empty(List *tail) { return tail == nullptr ? true : false; }
-    void push(List **head, List **tail, int x, int y){
+    void q_push(List **head, List **tail, int x, int y, int p){
+      List *temp = new List;
+      temp->data.x = x;
+      temp->data.y = y;
+      points++;
+      path.push_back(p);
+      temp->data.p = points;
+      int g = abs(X1 - x) + abs(Y1 - y);
+      int h = abs(X2 - x) + abs(Y2 - y);
+      temp->data.G = g;
+      temp->data.H = h;
+      int f = g + h;
+      temp->data.F = f;
+      temp->next = nullptr;
+      if (!(*head)) {
+        temp->prev = nullptr;
+        temp->next = nullptr;
+        (*head) = temp;
+        (*tail) = temp;
+      } else {
+        temp->prev = (*tail);
+        temp->next = nullptr;
+        (*tail)->next = temp;
+        (*tail) = temp;
+      }
+    }
+
+    void u_push(List **head, List **tail, int x, int y){
       List *temp = new List;
       temp->data.x = x;
       temp->data.y = y;
@@ -57,7 +87,7 @@ class Queue {
     void print(List *head){
       List *temp = head;
       while (temp) {
-        cout << temp->data.x << " " << temp->data.y << endl;
+        cout << temp->data.x << " " << temp->data.y << " " << temp->data.p << endl;
         cout << "--------" << endl;
         temp = temp->next;
       }
@@ -101,11 +131,12 @@ class Queue {
 
 };
 
+
+
 void A_star(){
   Queue U; //visited queue
   Queue Q; //unvisited queue
-
-  Q.push(&Q_head, &Q_tail, X1, X2);
+  Q.q_push(&Q_head, &Q_tail, X1, X2, 1);
   Q.getMin(&Q_head);
   List *current;
 
@@ -114,23 +145,26 @@ void A_star(){
     current = Q_head;
     int c_x = current->data.x;
     int c_y = current->data.y;
+    int c_p = current->data.p;
+    cout << c_x << " " << c_y << " " << path[c_p - 1] << endl;
     if ((c_x == X2) && (c_y == Y2)){
       cout << "Vse zaebis" << endl;
+      cout << "Sha vivedem put'" << endl;
       return;
     }
     Q.pop(&Q_head, &Q_tail);
-    U.push(&U_head, &U_tail, c_x, c_y);
+    U.u_push(&U_head, &U_tail, c_x, c_y);
     if (((U.include(&U_head, &U_tail, c_x-1, c_y) == false)||(gValue(c_x-1,c_y) < current->data.G))&&(U.include(&U_head, &U_tail, c_x-1,c_y) == false)){
-      if (data[c_x-1][c_y] != 'X') Q.push(&Q_head, &Q_tail, c_x-1, c_y);
+      if (data[c_x-1][c_y] != 'X') Q.q_push(&Q_head, &Q_tail, c_x-1, c_y, c_p);
     }
     if (((U.include(&U_head, &U_tail, c_x+1, c_y) == false)||(gValue(c_x+1,c_y) < current->data.G))&&(U.include(&U_head, &U_tail, c_x+1,c_y) == false)){
-      if (data[c_x+1][c_y] != 'X') Q.push(&Q_head, &Q_tail, c_x+1, c_y);
+      if (data[c_x+1][c_y] != 'X') Q.q_push(&Q_head, &Q_tail, c_x+1, c_y, c_p);
     }
     if (((U.include(&U_head, &U_tail, c_x, c_y+1) == false)||(gValue(c_x,c_y+1) < current->data.G))&&(U.include(&U_head, &U_tail, c_x,c_y+1) == false)){
-      if (data[c_x][c_y+1] != 'X') Q.push(&Q_head, &Q_tail, c_x, c_y+1);
+      if (data[c_x][c_y+1] != 'X') Q.q_push(&Q_head, &Q_tail, c_x, c_y+1, c_p);
     }
     if (((U.include(&U_head, &U_tail, c_x, c_y-1) == false)||(gValue(c_x,c_y-1) < current->data.G))&&(U.include(&U_head, &U_tail, c_x,c_y-1) == false)){
-      if (data[c_x][c_y-1] != 'X') Q.push(&Q_head, &Q_tail, c_x, c_y-1);
+      if (data[c_x][c_y-1] != 'X') Q.q_push(&Q_head, &Q_tail, c_x, c_y-1, c_p);
     }
  }
 
@@ -144,9 +178,11 @@ int main() {
 
 
 
-  while(getline(fin, line))
+  while(getline(fin, line)){
     data.push_back(line);
-    A_star();
+  }
+
+  A_star();
 
   // int x1 = 1, y1 = 6, x2 = 6, y2 = 1; // (x1, y1) - start point (x2, y2) - end point
   fin.close();
