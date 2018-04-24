@@ -34,7 +34,7 @@ List *U_head = nullptr;
 class Queue {
   public:
     bool empty(List *tail) { return tail == nullptr ? true : false; }
-    void q_push(List **head, List **tail, int x, int y, int p){
+    void q_push(List **head, List **tail, int x, int y, int p) {
       List *temp = new List;
       temp->data.x = x;
       temp->data.y = y;
@@ -61,7 +61,7 @@ class Queue {
       }
     }
 
-    void u_push(List **head, List **tail, int x, int y){
+    void u_push(List **head, List **tail, int x, int y) {
       List *temp = new List;
       temp->data.x = x;
       temp->data.y = y;
@@ -85,32 +85,21 @@ class Queue {
       }
     }
 
-    void print(List *head){
-      List *temp = head;
-      while (temp) {
-        cout << temp->data.x << " " << temp->data.y << " " << temp->data.p << endl;
-        cout << "--------" << endl;
-        temp = temp->next;
-      }
-    }
-
-  void pop(List **head, List **tail){
-    if ((*head) == (*tail)) {(*head) = (*tail) = nullptr;}
-    else if ((*head)) {
-        List *temp = (*head);
+  void pop(List **head, List **tail) {
+    if (*head == *tail) (*head) = (*tail) = nullptr;
+    else if (*head) {
+        List *temp = *head;
         (*head)->next->prev = nullptr;
         (*head) = (*head)->next;
         delete temp;
     }
   };
 
-  void getMin(List **head){
+  void getMin(List **head) {
     List *temp = *head;
     List *min_f = *head;
     while (temp) {
-      if (temp->data.F < min_f->data.F) {
-        min_f = temp;
-      }
+      if (temp->data.F < min_f->data.F) min_f = temp;
       temp = temp->next;
     }
     swap(min_f->data.x, (*head)->data.x);
@@ -118,13 +107,12 @@ class Queue {
     swap(min_f->data.G, (*head)->data.G);
     swap(min_f->data.H, (*head)->data.H);
     swap(min_f->data.F, (*head)->data.F);
-
   }
 
   bool include(List **head, List **tail, int x, int y) {
     List *temp = (*head);
     while (temp) {
-      if ((temp->data.x == x)&&(temp->data.y == y)) return true;
+      if ((temp->data.x == x) && (temp->data.y == y)) return true;
       temp = temp->next;
     }
     return false;
@@ -132,8 +120,7 @@ class Queue {
 
   int step_counter(int i, int step) {
     if (i > 1) {
-      step++;
-      step_counter(steps[i][2] - 1, step);
+      step_counter(steps[i][2] - 1, step + 1);
     } else return step;
   }
 
@@ -141,78 +128,88 @@ class Queue {
     if (step >= 0) {
       char temp = 97 + step;
       data[steps[i - 1][0]][steps[i - 1][1]] = temp;
-      step--;
-      print_way(steps[i][2] - 1, step);
+      print_way(steps[i - 1][2], step - 1);
     } else {
       for (int i = 0; i < data.size(); i++) {
-        for (int j = 0; j < data[i].length(); j++) {
+        for (int j = 0; j < data[i].length(); j++)
           cout << data[i][j];
-        }
         cout << endl;
       }
     }
   }
 };
 
-void A_star(){
+void A_star() {
   Queue U; //visited queue
   Queue Q; //unvisited queue
-  Q.q_push(&Q_head, &Q_tail, X1, X2, 1);
+  Q.q_push(&Q_head, &Q_tail, X1, Y1, 1);
   Q.getMin(&Q_head);
   List *current;
 
-  while(!Q.empty(Q_tail)){
-    Q.getMin(&Q_head);
+  while(!Q.empty(Q_tail)) {
     current = Q_head;
     int c_x = current->data.x;
     int c_y = current->data.y;
     int c_p = current->data.p;
     vector<int> step = {c_x, c_y, path[c_p - 1]};
     steps.push_back(step);
+
     if ((c_x == X2) && (c_y == Y2)) {
       int step = Q.step_counter(steps[steps.size() - 1][2], 0);
-      data[steps[steps.size()-1][0]][steps[steps.size()-1][1]] = (char)(98 + step);
+      data[steps[steps.size() - 1][0]][steps[steps.size() - 1][1]] = step + 98;
       Q.print_way(steps[steps.size() - 1][2], step);
       return;
     }
+
     Q.pop(&Q_head, &Q_tail);
     U.u_push(&U_head, &U_tail, c_x, c_y);
 
-    if (((U.include(&U_head, &U_tail, c_x-1, c_y) == false)
-    || (gValue(c_x-1,c_y) < current->data.G))
-    && (U.include(&U_head, &U_tail, c_x-1,c_y) == false)) {
-      if (data[c_x-1][c_y] != 'X') Q.q_push(&Q_head, &Q_tail, c_x-1, c_y, c_p);
+    if (((U.include(&U_head, &U_tail, c_x - 1, c_y) == false)
+    || (gValue(c_x - 1,c_y) < current->data.G))
+    && (U.include(&U_head, &U_tail, c_x - 1,c_y) == false)) {
+      if (data[c_x - 1][c_y] != 'X')
+        Q.q_push(&Q_head, &Q_tail, c_x - 1, c_y, c_p);
     }
-    if (((U.include(&U_head, &U_tail, c_x+1, c_y) == false)
-    || (gValue(c_x+1,c_y) < current->data.G))
-    && (U.include(&U_head, &U_tail, c_x+1,c_y) == false)) {
-      if (data[c_x+1][c_y] != 'X') Q.q_push(&Q_head, &Q_tail, c_x+1, c_y, c_p);
+
+    if (((U.include(&U_head, &U_tail, c_x + 1, c_y) == false)
+    || (gValue(c_x + 1,c_y) < current->data.G))
+    && (U.include(&U_head, &U_tail, c_x + 1,c_y) == false)) {
+      if (data[c_x + 1][c_y] != 'X')
+        Q.q_push(&Q_head, &Q_tail, c_x + 1, c_y, c_p);
     }
-    if (((U.include(&U_head, &U_tail, c_x, c_y+1) == false)
-    || (gValue(c_x,c_y+1) < current->data.G))
-    && (U.include(&U_head, &U_tail, c_x,c_y+1) == false)) {
-      if (data[c_x][c_y+1] != 'X') Q.q_push(&Q_head, &Q_tail, c_x, c_y+1, c_p);
+
+    if (((U.include(&U_head, &U_tail, c_x, c_y + 1) == false)
+    || (gValue(c_x,c_y + 1) < current->data.G))
+    && (U.include(&U_head, &U_tail, c_x,c_y + 1) == false)) {
+      if (data[c_x][c_y + 1] != 'X')
+        Q.q_push(&Q_head, &Q_tail, c_x, c_y + 1, c_p);
     }
-    if (((U.include(&U_head, &U_tail, c_x, c_y-1) == false)
-    || (gValue(c_x,c_y-1) < current->data.G))
-    && (U.include(&U_head, &U_tail, c_x,c_y-1) == false)) {
-      if (data[c_x][c_y-1] != 'X') Q.q_push(&Q_head, &Q_tail, c_x, c_y-1, c_p);
+
+    if (((U.include(&U_head, &U_tail, c_x, c_y - 1) == false)
+    || (gValue(c_x,c_y - 1) < current->data.G ))
+    && (U.include(&U_head, &U_tail, c_x,c_y - 1) == false)) {
+      if (data[c_x][c_y - 1] != 'X')
+        Q.q_push(&Q_head, &Q_tail, c_x, c_y - 1, c_p);
     }
  }
-
 }
 
 
 int main() {
-
   ifstream fin("input.txt");
   string line;
 
-  while(getline(fin, line)){
+  while(getline(fin, line))
     data.push_back(line);
-  }
 
   A_star();
+
+  for (int i = 0; i < steps.size(); i++) {
+    for (int j = 0; j < steps[i].size(); j++) {
+      cout << steps[i][j] << " ";
+    }
+    cout << endl;
+  }
   fin.close();
   return 0;
 }
