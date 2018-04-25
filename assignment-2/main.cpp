@@ -99,7 +99,7 @@ class Queue {
     List *temp = *head;
     List *min_f = *head;
     while (temp) {
-      if (temp->data.F < min_f->data.F) min_f = temp;
+      if (temp->data.F <= min_f->data.F) min_f = temp;
       temp = temp->next;
     }
     swap(min_f->data.x, (*head)->data.x);
@@ -120,7 +120,7 @@ class Queue {
 
   int step_counter(int i, int step) {
     if (i > 1) {
-      step_counter(steps[i][2] - 1, step + 1);
+      step_counter(steps[i - 1][2], step + 1);
     } else return step;
   }
 
@@ -164,32 +164,76 @@ void A_star() {
     Q.pop(&Q_head, &Q_tail);
     U.u_push(&U_head, &U_tail, c_x, c_y);
 
-    if (((U.include(&U_head, &U_tail, c_x - 1, c_y) == false)
-    || (gValue(c_x - 1,c_y) < current->data.G))
-    && (U.include(&U_head, &U_tail, c_x - 1,c_y) == false)) {
-      if (data[c_x - 1][c_y] != 'X')
-        Q.q_push(&Q_head, &Q_tail, c_x - 1, c_y, c_p);
+    if ((c_x + 2 >= 0) && (c_x + 2 < data.size()) && (c_y + 1 >= 0) && (c_y + 1 < data.size())) {
+      if (((U.include(&U_head, &U_tail, c_x + 2, c_y + 1) == false)
+      || (gValue(c_x + 2,c_y + 1) < current->data.G))
+      && (U.include(&U_head, &U_tail, c_x + 2,c_y + 1) == false)) {
+        if (data[c_x + 2][c_y + 1] != 'X')
+          Q.q_push(&Q_head, &Q_tail, c_x + 2, c_y + 1, c_p);
+      }
     }
 
-    if (((U.include(&U_head, &U_tail, c_x + 1, c_y) == false)
-    || (gValue(c_x + 1,c_y) < current->data.G))
-    && (U.include(&U_head, &U_tail, c_x + 1,c_y) == false)) {
-      if (data[c_x + 1][c_y] != 'X')
-        Q.q_push(&Q_head, &Q_tail, c_x + 1, c_y, c_p);
+    if ((c_x + 2 >= 0) && (c_x + 2 < data.size()) && (c_y - 1 >= 0) && (c_y - 1 < data.size())) {
+      if (((U.include(&U_head, &U_tail, c_x + 2, c_y - 1) == false)
+      || (gValue(c_x + 2,c_y - 1) < current->data.G))
+      && (U.include(&U_head, &U_tail, c_x + 2,c_y - 1) == false)) {
+        if (data[c_x + 2][c_y - 1] != 'X')
+          Q.q_push(&Q_head, &Q_tail, c_x + 2, c_y - 1, c_p);
+      }
     }
 
-    if (((U.include(&U_head, &U_tail, c_x, c_y + 1) == false)
-    || (gValue(c_x,c_y + 1) < current->data.G))
-    && (U.include(&U_head, &U_tail, c_x,c_y + 1) == false)) {
-      if (data[c_x][c_y + 1] != 'X')
-        Q.q_push(&Q_head, &Q_tail, c_x, c_y + 1, c_p);
+    if ((c_x + 1 >= 0) && (c_x + 1 < data.size()) && (c_y + 2 >= 0) && (c_y + 2 < data.size())) {
+      if (((U.include(&U_head, &U_tail, c_x + 1, c_y + 2) == false)
+      || (gValue(c_x + 1,c_y + 2) < current->data.G))
+      && (U.include(&U_head, &U_tail, c_x + 1,c_y + 2) == false)) {
+        if (data[c_x + 1][c_y + 2] != 'X')
+          Q.q_push(&Q_head, &Q_tail, c_x + 1, c_y + 2, c_p);
+      }
     }
 
-    if (((U.include(&U_head, &U_tail, c_x, c_y - 1) == false)
-    || (gValue(c_x,c_y - 1) < current->data.G ))
-    && (U.include(&U_head, &U_tail, c_x,c_y - 1) == false)) {
-      if (data[c_x][c_y - 1] != 'X')
-        Q.q_push(&Q_head, &Q_tail, c_x, c_y - 1, c_p);
+    if ((c_x - 1 >= 0) && (c_x - 1 < data.size()) && (c_y + 2 >= 0) && (c_y + 2 < data.size())) {
+      if (((U.include(&U_head, &U_tail, c_x - 1, c_y + 2) == false)
+      || (gValue(c_x - 1,c_y + 2) < current->data.G))
+      && (U.include(&U_head, &U_tail, c_x - 1,c_y + 2) == false)) {
+        if (data[c_x - 1][c_y + 2] != 'X')
+          Q.q_push(&Q_head, &Q_tail, c_x - 1, c_y + 2, c_p);
+      }
+    }
+
+    if ((c_x - 2 >= 0) && (c_x - 2 < data.size()) && (c_y + 1 >= 0) && (c_y + 1 < data.size())) {
+      if (((U.include(&U_head, &U_tail, c_x - 2, c_y + 1) == false)
+      || (gValue(c_x - 2,c_y + 1) < current->data.G))
+      && (U.include(&U_head, &U_tail, c_x - 2,c_y + 1) == false)) {
+        if (data[c_x - 2][c_y + 1] != 'X')
+          Q.q_push(&Q_head, &Q_tail, c_x - 2, c_y + 1, c_p);
+      }
+    }
+
+    if ((c_x - 2 >= 0) && (c_x - 2 < data.size()) && (c_y - 1 >= 0) && (c_y - 1 < data.size())) {
+      if (((U.include(&U_head, &U_tail, c_x - 2, c_y - 1) == false)
+      || (gValue(c_x - 2,c_y - 1) < current->data.G))
+      && (U.include(&U_head, &U_tail, c_x - 2,c_y - 1) == false)) {
+        if (data[c_x - 2][c_y - 1] != 'X')
+          Q.q_push(&Q_head, &Q_tail, c_x - 2, c_y - 1, c_p);
+      }
+    }
+
+    if ((c_x - 1 >= 0) && (c_x - 1 < data.size()) && (c_y - 2 >= 0) && (c_y - 2 < data.size())) {
+      if (((U.include(&U_head, &U_tail, c_x - 1, c_y - 2) == false)
+      || (gValue(c_x - 1,c_y - 2) < current->data.G))
+      && (U.include(&U_head, &U_tail, c_x - 1,c_y - 2) == false)) {
+        if (data[c_x - 1][c_y - 2] != 'X')
+          Q.q_push(&Q_head, &Q_tail, c_x - 1, c_y - 2, c_p);
+      }
+    }
+
+    if ((c_x + 1 >= 0) && (c_x + 1 < data.size()) && (c_y - 2 >= 0) && (c_y - 2 < data.size())) {
+      if (((U.include(&U_head, &U_tail, c_x + 1, c_y - 2) == false)
+      || (gValue(c_x + 1,c_y - 2) < current->data.G))
+      && (U.include(&U_head, &U_tail, c_x + 1,c_y - 2) == false)) {
+        if (data[c_x + 1][c_y - 2] != 'X')
+          Q.q_push(&Q_head, &Q_tail, c_x + 1, c_y - 2, c_p);
+      }
     }
  }
 }
@@ -204,12 +248,6 @@ int main() {
 
   A_star();
 
-  for (int i = 0; i < steps.size(); i++) {
-    for (int j = 0; j < steps[i].size(); j++) {
-      cout << steps[i][j] << " ";
-    }
-    cout << endl;
-  }
   fin.close();
   return 0;
 }
